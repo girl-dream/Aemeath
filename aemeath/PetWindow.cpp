@@ -186,7 +186,7 @@ void PetWindow::HandleCommand(int id)
     // 透明度
     if (id >= 2100 && id <= 2107) { SetTransparency(id - 2100); return; }
 
-    // 闲置动画
+    // 静止动画
     if (id >= 2400 && id <= 2404)
     {
         g_petIdleIndex = id - 2400;
