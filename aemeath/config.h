@@ -5,6 +5,7 @@ struct AppConfig
 {
     int scaleIndex = 3;
     int transparencyIndex = 0;
+    int petIdleIndex = 4;
     int windowX = 500;
     int windowY = 500;
     bool autoStartup = false;

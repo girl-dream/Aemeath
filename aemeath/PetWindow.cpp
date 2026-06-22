@@ -8,11 +8,13 @@
 AppConfig g_config;
 int g_scaleIndex = 3;
 int g_transparencyIndex = 0;
+int g_petIdleIndex = 4;
+
 // 初始化 GDI+、加载配置、注册窗口类、创建窗口和加载 GIF
 PetWindow::PetWindow(HINSTANCE hInst) : hInst(hInst), tray()
 {
     //设置原子锁
-    PetWindow::CheckSingleInstance();
+    CheckSingleInstance();
     // GDI+
     Gdiplus::GdiplusStartupInput gsi;
     GdiplusStartup(&gdiplusToken, &gsi, nullptr);
@@ -22,12 +24,15 @@ PetWindow::PetWindow(HINSTANCE hInst) : hInst(hInst), tray()
     g_config = cfg;
     g_scaleIndex = cfg.scaleIndex;
     g_transparencyIndex = cfg.transparencyIndex;
+    g_petIdleIndex = cfg.petIdleIndex;
 
     //防止配置里存了越界值
     if (cfg.scaleIndex < 0 || cfg.scaleIndex > 8)
         cfg.scaleIndex = g_scaleIndex = 3;   // 默认中间值
     if (cfg.transparencyIndex < 0 || cfg.transparencyIndex > 7)
         cfg.transparencyIndex = g_transparencyIndex = 0; // 默认不透明
+    if (cfg.petIdleIndex < 0 || cfg.petIdleIndex > 4)
+        cfg.petIdleIndex = 4; // 默认随机动画
 
     //窗口注册
     WNDCLASS wc = {};
@@ -180,6 +185,20 @@ void PetWindow::HandleCommand(int id)
 
     // 透明度
     if (id >= 2100 && id <= 2107) { SetTransparency(id - 2100); return; }
+
+    // 闲置动画
+    if (id >= 2400 && id <= 2404)
+    {
+        g_petIdleIndex = id - 2400;
+        cfg.petIdleIndex = g_petIdleIndex;
+        if (isPaused && g_petIdleIndex != 4)
+        {
+            currentGif = &idle[g_petIdleIndex];
+            frameIndex = 0;
+        }
+        Config::Save(cfg);
+        return;
+    }
 
     // 跟随
     if (id == 2200)
@@ -360,9 +379,17 @@ void PetWindow::StopDrag()
     motion->ApplyExternalVelocity(vx, vy);
 
     if (isPaused)
-	{   // 如果暂停，随机选择一个闲置动画
-        currentGif = &idle[rand() % 4];
-        frameIndex = 0;
+    {
+        if (g_petIdleIndex != 4)
+        {
+            currentGif = &idle[g_petIdleIndex];
+        }
+        else
+        {
+            // 如果暂停，随机选择一个闲置动画
+            currentGif = &idle[rand() % 4];
+            frameIndex = 0;
+        }
         return;
     }
     if (motion->IsMovingRight())
@@ -407,8 +434,16 @@ void PetWindow::TogglePause()
     isPaused = !isPaused;
 
     if (isPaused)
-	{// 暂停时随机选择一个闲置动画
-        currentGif = &idle[rand() % 4];
+    {
+        if (g_petIdleIndex != 4)
+        {
+            currentGif = &idle[g_petIdleIndex];
+        }
+        else
+        {
+            // 暂停时随机选择一个闲置动画
+            currentGif = &idle[rand() % 4];
+        }
         frameIndex = 0;
     }
     else

@@ -6,6 +6,7 @@
 extern AppConfig g_config; 
 extern int g_scaleIndex;
 extern int g_transparencyIndex;
+extern int g_petIdleIndex;
 
 void TrayIcon::Init(HINSTANCE hInst, HWND Hwnd_)
 {
@@ -48,9 +49,18 @@ void TrayIcon::ShowMenu()
             (i == g_transparencyIndex ? MF_CHECKED : MF_UNCHECKED),
             2100 + i,
             alphaText[i]);
+    // 子菜单：选择静止动画
+    HMENU gifMenu = CreatePopupMenu();
+    const wchar_t* gifText[] = { L"1",L"2",L"3",L"4",L"随机" };
+    for (int i = 0; i < 5; i++)
+        AppendMenuW(gifMenu,
+            (i == g_petIdleIndex ? MF_CHECKED : MF_UNCHECKED),
+            2400 + i,
+            gifText[i]);
 
     AppendMenuW(menu, MF_POPUP, (UINT_PTR)scaleMenu, L"缩放");
     AppendMenuW(menu, MF_POPUP, (UINT_PTR)alphaMenu, L"透明度");
+    AppendMenuW(menu, MF_POPUP, (UINT_PTR)gifMenu, L"静止动画");
 
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
 

@@ -30,6 +30,7 @@ AppConfig Config::Load()
     cfg.windowX = j.value("window_x", cfg.windowX);
     cfg.windowY = j.value("window_y", cfg.windowY);
     cfg.scaleIndex = j.value("scale_index", cfg.scaleIndex);
+    cfg.petIdleIndex = j.value("pet_idle_index", cfg.petIdleIndex);
     cfg.transparencyIndex = j.value("transparency_index", cfg.transparencyIndex);
     cfg.autoStartup = j.value("auto_startup", cfg.autoStartup);
     cfg.clickThrough = j.value("click_through", cfg.clickThrough);
@@ -39,13 +40,16 @@ AppConfig Config::Load()
         cfg.scaleIndex = 3;
     if (cfg.transparencyIndex < 0 || cfg.transparencyIndex > 7)
         cfg.transparencyIndex = 0;
+    if (cfg.petIdleIndex < 0 || cfg.petIdleIndex > 4)
+        cfg.petIdleIndex = 4;
 #ifdef _DEBUG
         std::stringstream ss;
         ss << "\n[Config::Load] Loaded config:\n"
-            << "  window_x          = " << cfg.windowX << "\n"
-            << "  window_y          = " << cfg.windowY << "\n"
+            << "  window_x           = " << cfg.windowX << "\n"
+            << "  window_y           = " << cfg.windowY << "\n"
             << "  scale_index        = " << cfg.scaleIndex << "\n"
             << "  transparency_index = " << cfg.transparencyIndex << "\n"
+            << "  pet_idle_index     = " << cfg.petIdleIndex << "\n"
             << "  auto_startup       = " << (cfg.autoStartup ? "true" : "false") << "\n"
             << "  click_through      = " << (cfg.clickThrough ? "true" : "false") << "\n"
             << "  follow_mouse       = " << (cfg.followMouse ? "true" : "false") << "\n"
@@ -60,6 +64,7 @@ void Config::Save(const AppConfig& cfg)
     json j;
     j["scale_index"] = cfg.scaleIndex;
     j["transparency_index"] = cfg.transparencyIndex;
+    j["pet_idle_index"] = cfg.petIdleIndex;
     j["auto_startup"] = cfg.autoStartup;
     j["click_through"] = cfg.clickThrough;
     j["follow_mouse"] = cfg.followMouse;
@@ -70,10 +75,11 @@ void Config::Save(const AppConfig& cfg)
 #ifdef _DEBUG
         std::stringstream ss;
         ss << "\n[Config::Save] Saving config:\n"
-            << "  window_x          = " << cfg.windowX << "\n"
-            << "  window_y          = " << cfg.windowY << "\n"
+            << "  window_x           = " << cfg.windowX << "\n"
+            << "  window_y           = " << cfg.windowY << "\n"
             << "  scale_index        = " << cfg.scaleIndex << "\n"
             << "  transparency_index = " << cfg.transparencyIndex << "\n"
+            << "  pet_idle_index     = " << cfg.petIdleIndex << "\n"
             << "  auto_startup       = " << (cfg.autoStartup ? "true" : "false") << "\n"
             << "  click_through      = " << (cfg.clickThrough ? "true" : "false") << "\n"
             << "  follow_mouse       = " << (cfg.followMouse ? "true" : "false") << "\n"
