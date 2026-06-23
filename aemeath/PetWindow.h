@@ -36,12 +36,14 @@ private:
     void SetAutoStartup(bool enable);
     // 原子锁
     void CheckSingleInstance();
-    //释放所有 GDI+ 对象
+    // 释放所有 GDI+ 对象
     void DestroyAllGifs();
+    // 键盘钩子
+    static LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
 private:
     // 基础
     HINSTANCE hInst;
-    HWND Hwnd = nullptr;
+    static HWND Hwnd;
     ULONG_PTR gdiplusToken;
 
     // 配置
@@ -70,4 +72,7 @@ private:
 
     // 原子锁
     HANDLE hMutex;
+
+    // 键盘钩子
+    static HHOOK hHook;
 };

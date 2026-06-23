@@ -4,6 +4,10 @@
 #include <windowsx.h>
 #include "resource.h"
 #pragma comment(lib, "gdiplus.lib")
+
+// 静态变量初始化
+HWND PetWindow::Hwnd = nullptr;
+HHOOK PetWindow::hHook = NULL;
 // 全局状态（给托盘菜单用）
 AppConfig g_config;
 int g_scaleIndex = 3;
@@ -58,6 +62,9 @@ PetWindow::PetWindow(HINSTANCE hInst) : hInst(hInst), tray()
     currentGif->DrawFrame(Hwnd, 0, 0, 0);
 	// 应用配置的透明度设置
     SetTransparency(cfg.transparencyIndex);
+
+    // 键盘事件
+    hHook = SetWindowsHookEx(WH_KEYBOARD_LL, KeyboardProc, GetModuleHandle(NULL), 0);
 
     tray.Init(hInst, Hwnd);
     if (cfg.defaultState) TogglePause();
@@ -171,11 +178,39 @@ LRESULT PetWindow::HandleMessage(UINT msg, WPARAM w, LPARAM l)
         DestroyAllGifs();
         Gdiplus::GdiplusShutdown(gdiplusToken);
         CloseHandle(hMutex);
+        UnhookWindowsHookEx(hHook);
         PostQuitMessage(0);
         return 0;
     }
 
     return DefWindowProc(Hwnd, msg, w, l);
+}
+// 静态键盘事件函数
+LRESULT CALLBACK PetWindow::KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
+{
+    if (nCode == HC_ACTION)
+    {
+        KBDLLHOOKSTRUCT* p = (KBDLLHOOKSTRUCT*)lParam;
+        if (wParam == WM_KEYDOWN)
+        {
+            switch (p->vkCode)
+            {
+                case VK_F6:
+                {
+                    // 静止/飞行
+                    PostMessage(Hwnd, WM_COMMAND, 2300, 0);
+                    break;
+                }
+                case VK_F7:
+                {
+                    // 跟随鼠标
+                    PostMessage(Hwnd, WM_COMMAND, 2200, 0);
+                    break;
+                }
+            }
+        }
+    }
+    return CallNextHookEx(hHook, nCode, wParam, lParam);
 }
 // 处理托盘菜单命令，根据 ID 执行对应操作
 void PetWindow::HandleCommand(int id)
