@@ -14,7 +14,7 @@ public:
     bool Load(const std::wstring& path, double scale = 1.0);
     void DrawFrame(HWND Hwnd, int frameIndex, int x, int y);
     BYTE globalAlpha = 255;   // 默认不透明
-    void SetGlobalAlpha(BYTE a) { globalAlpha = a; }
+    void SetGlobalAlpha(BYTE a) { globalAlpha = a; if (flipped) flipped->globalAlpha = a;}
     int GetFrameCount() const { return (int)frames.size(); }
     int Width() const { return width; }
     int Height() const { return height; }
