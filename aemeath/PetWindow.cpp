@@ -19,7 +19,7 @@ PetWindow::PetWindow(HINSTANCE hInst) : hInst(hInst), tray()
     //设置原子锁
     CheckSingleInstance();
 
-    // UIAccess
+    // 获取UIAccess
     UIAccess uiAccess;
     DWORD dwErr = uiAccess.prepare();
 #if _DEBUG
