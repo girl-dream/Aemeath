@@ -1,6 +1,5 @@
-﻿#include <windows.h>
-#include "PetWindow.h"
-
+﻿#include "PetWindow.h"
+#include "uiaccess.h"
 #ifdef _DEBUG
 #include "Logger.h"
 #include <shlobj_core.h>
@@ -18,9 +17,20 @@ void AttachConsole()
 }
 int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int nCmdShow)
 {
+    // 获取UIAccess
+    UIAccess uiAccess;
+    DWORD dwErr = uiAccess.prepare();
 #ifdef _DEBUG
     AttachConsole();
     Logger::SetLevel(Logger::Level::Debug, Logger::LoggerType::ConsoleLogger);
+    if (dwErr == ERROR_SUCCESS)
+    {
+        LOG_INFO("UIAccess 权限获取成功");
+    }
+    else
+    {
+        LOG_WARNING("UIAccess 权限获取失败: 0x%08X", dwErr);
+    }
     if (IsUserAnAdmin())
     {
         LOG_INFO("具有管理员权限");

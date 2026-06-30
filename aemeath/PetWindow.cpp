@@ -1,7 +1,6 @@
 ﻿#include "PetWindow.h"
 #include "Config.h"
 #include "TrayIcon.h"
-#include "uiaccess.h"
 #include "resource.h"
 #include <windowsx.h>
 #if _DEBUG
@@ -18,21 +17,6 @@ PetWindow::PetWindow(HINSTANCE hInst) : hInst(hInst), tray()
 {
     //设置原子锁
     CheckSingleInstance();
-
-    // 获取UIAccess
-    UIAccess uiAccess;
-    DWORD dwErr = uiAccess.prepare();
-#if _DEBUG
-    if (dwErr == ERROR_SUCCESS)
-{
-    LOG_INFO("UIAccess 权限获取成功");
-}
-else
-{
-    LOG_WARNING("UIAccess 权限获取失败: 0x%08X", dwErr);
-}
-#endif // _DEBUG
-
 
     // GDI+
     Gdiplus::GdiplusStartupInput gsi;
