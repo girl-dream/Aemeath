@@ -1,5 +1,9 @@
 # Aemeath (飞行雪绒)
 
+与原仓库不同的地方
+- 配置文件替换为 ini
+- 获取[UIAccess](https://github.com/killtimer0/uiaccess)始终置顶爱弥斯(<span style="color:red;">必须以管理员身份运行</span>)
+
 项目概述
 - `Aemeath` 是一个基于 Win32 + GDI+ 的桌面宠物/动画演示程序，使用分层窗口（`WS_EX_LAYERED`）实现每像素 alpha 混合。
 - GIF 的解码、缩放与逐帧渲染由 `GifPlayer` / `GifLoader` 实现。托盘交互、配置保存、运动逻辑等构成完整功能。

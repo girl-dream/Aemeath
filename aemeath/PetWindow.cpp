@@ -1,8 +1,12 @@
 ﻿#include "PetWindow.h"
 #include "Config.h"
 #include "TrayIcon.h"
-#include <windowsx.h>
+#include "uiaccess.h"
 #include "resource.h"
+#include <windowsx.h>
+#if _DEBUG
+#include "Logger.h"
+#endif
 #pragma comment(lib, "gdiplus.lib")
 // 全局状态（给托盘菜单用）
 AppConfig g_config;
@@ -14,8 +18,22 @@ PetWindow::PetWindow(HINSTANCE hInst) : hInst(hInst), tray()
 {
     //设置原子锁
     CheckSingleInstance();
-    // 初始化 COM
-    CoInitialize(NULL);
+
+    // UIAccess
+    UIAccess uiAccess;
+    DWORD dwErr = uiAccess.prepare();
+#if _DEBUG
+    if (dwErr == ERROR_SUCCESS)
+{
+    LOG_INFO("UIAccess 权限获取成功");
+}
+else
+{
+    LOG_WARNING("UIAccess 权限获取失败: 0x%08X", dwErr);
+}
+#endif // _DEBUG
+
+
     // GDI+
     Gdiplus::GdiplusStartupInput gsi;
     GdiplusStartup(&gdiplusToken, &gsi, nullptr);
@@ -35,7 +53,7 @@ PetWindow::PetWindow(HINSTANCE hInst) : hInst(hInst), tray()
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     RegisterClass(&wc);
     //窗口创建
-    Hwnd = CreateWindowEx(WS_EX_LAYERED | WS_EX_TOPMOST | WS_EX_TOOLWINDOW,wc.lpszClassName, L"",WS_POPUP, cfg.windowX, cfg.windowY, 200, 200, nullptr, nullptr, hInst, this);
+    Hwnd = CreateWindowEx(WS_EX_LAYERED | WS_EX_TOOLWINDOW,wc.lpszClassName, L"",WS_POPUP, cfg.windowX, cfg.windowY, 200, 200, nullptr, nullptr, hInst, this);
     // 加载 GIF（从资源）
     LoadAllGifs();
 

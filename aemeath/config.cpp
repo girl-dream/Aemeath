@@ -1,93 +1,98 @@
 ﻿#include "Config.h"
-#include <nlohmann/json.hpp>
 #include <windows.h>
 #include <shlobj.h>
 #include <fstream>
+#include <sstream>
 #include "logger.h"
-using json = nlohmann::json;
 /// <summary>
-/// 获取配置文件的完整路径。函数从当前用户的 AppData（使用 CSIDL_APPDATA）获取目录，并在其后追加文件名 aemeath_config.json。
+/// 获取配置文件的完整路径。函数从当前用户的 AppData（使用 CSIDL_APPDATA）获取目录，并在其后追加文件名 aemeath_config.ini。
 /// </summary>
-/// <returns>返回一个 std::wstring，包含用户的 AppData 目录和追加的文件名 aemeath_config.json（由 SHGetFolderPathW 获取的路径）。</returns>
+/// <returns>返回一个 std::wstring，包含用户的 AppData 目录和追加的文件名 aemeath_config.ini（由 SHGetFolderPathW 获取的路径）。</returns>
 std::wstring Config::GetConfigPath()
 {
     wchar_t appdata[MAX_PATH];
     SHGetFolderPathW(nullptr, CSIDL_APPDATA, nullptr, 0, appdata);
     std::wstring path = appdata;
-    path += L"\\aemeath_config.json";
+    path += L"\\aemeath_config.ini";
     return path;
 }
 
 AppConfig Config::Load()
 {
     AppConfig cfg;
-    std::wstring path = GetConfigPath();
-    std::ifstream in(path);
+    std::wstring temp_path = GetConfigPath();
+    std::ifstream in(temp_path);
     if (!in.is_open()) return cfg;
+    in.close();
+    LPCWSTR path = temp_path.c_str();
 
-    json j;
-    in >> j;
-    cfg.windowX = j.value("window_x", cfg.windowX);
-    cfg.windowY = j.value("window_y", cfg.windowY);
-    cfg.scaleIndex = j.value("scale_index", cfg.scaleIndex);
-    cfg.petIdleIndex = j.value("pet_idle_index", cfg.petIdleIndex);
-    cfg.transparencyIndex = j.value("transparency_index", cfg.transparencyIndex);
-    cfg.autoStartup = j.value("auto_startup", cfg.autoStartup);
-    cfg.clickThrough = j.value("click_through", cfg.clickThrough);
-    cfg.followMouse = j.value("follow_mouse", cfg.followMouse);
-    cfg.defaultState = j.value("defaultState", cfg.defaultState);
+    WCHAR buffer[256];
+    cfg.windowX = GetPrivateProfileIntW(L"Location", L"window_x", 500, path);
+    cfg.windowY = GetPrivateProfileIntW(L"Location", L"window_y", 500, path);
 
-    //防止配置里存了越界值
-    if (cfg.scaleIndex < 0 || cfg.scaleIndex > 8)
-        cfg.scaleIndex = 3;   // 默认中间值
-    if (cfg.transparencyIndex < 0 || cfg.transparencyIndex > 7)
-        cfg.transparencyIndex = 0; // 默认不透明
-    if (cfg.petIdleIndex < 0 || cfg.petIdleIndex > 4)
-        cfg.petIdleIndex = 4; // 默认随机动画
+    cfg.scaleIndex = GetPrivateProfileIntW(L"General", L"scale_index", 3, path);
+    cfg.transparencyIndex = GetPrivateProfileIntW(L"General", L"transparency_index", 0, path);
+    GetPrivateProfileStringW(L"General", L"auto_startup", L"false", buffer, 256, path);
+    cfg.autoStartup = (_wcsicmp(buffer, L"true") == 0);
+    GetPrivateProfileStringW(L"General", L"click_through", L"false", buffer, 256, path);
+    cfg.clickThrough = (_wcsicmp(buffer, L"true") == 0);
+    GetPrivateProfileStringW(L"General", L"defaultState", L"true", buffer, 256, path);
+    cfg.defaultState = (_wcsicmp(buffer, L"true") == 0);
+
+    GetPrivateProfileStringW(L"General", L"follow_mouse", L"false", buffer, 256, path);
+    cfg.followMouse = (_wcsicmp(buffer, L"true") == 0);
+
+    cfg.petIdleIndex = GetPrivateProfileIntW(L"General", L"pet_idle_index", 4, path);
+
 #ifdef _DEBUG
-        std::stringstream ss;
-        ss << "\n[Config::Load] Loaded config:\n"
-            << "  window_x           = " << cfg.windowX << "\n"
-            << "  window_y           = " << cfg.windowY << "\n"
-            << "  scale_index        = " << cfg.scaleIndex << "\n"
-            << "  transparency_index = " << cfg.transparencyIndex << "\n"
-            << "  pet_idle_index     = " << cfg.petIdleIndex << "\n"
-            << "  auto_startup       = " << (cfg.autoStartup ? "true" : "false") << "\n"
-            << "  click_through      = " << (cfg.clickThrough ? "true" : "false") << "\n"
-            << "  follow_mouse       = " << (cfg.followMouse ? "true" : "false") << "\n"
-            << "  defaultState       = " << (cfg.defaultState ? "true" : "false");
-        LOG_INFO(ss.str().c_str());
+    std::stringstream ss;
+    ss << "\n[Config::Load] Loaded config:\n"
+        << "  window_x           = " << cfg.windowX << "\n"
+        << "  window_y           = " << cfg.windowY << "\n"
+        << "  scale_index        = " << cfg.scaleIndex << "\n"
+        << "  transparency_index = " << cfg.transparencyIndex << "\n"
+        << "  pet_idle_index     = " << cfg.petIdleIndex << "\n"
+        << "  auto_startup       = " << (cfg.autoStartup ? "true" : "false") << "\n"
+        << "  click_through      = " << (cfg.clickThrough ? "true" : "false") << "\n"
+        << "  follow_mouse       = " << (cfg.followMouse ? "true" : "false") << "\n"
+        << "  defaultState       = " << (cfg.defaultState ? "true" : "false");
+    LOG_INFO(ss.str().c_str());
 #endif  
     return cfg;
 }
 
 void Config::Save(const AppConfig& cfg)
 {
-    json j;
-    j["scale_index"] = cfg.scaleIndex;
-    j["transparency_index"] = cfg.transparencyIndex;
-    j["pet_idle_index"] = cfg.petIdleIndex;
-    j["auto_startup"] = cfg.autoStartup;
-    j["click_through"] = cfg.clickThrough;
-    j["follow_mouse"] = cfg.followMouse;
-    j["defaultState"] = cfg.defaultState;
-    j["window_x"] = cfg.windowX;
-    j["window_y"] = cfg.windowY;
-    std::wstring path = GetConfigPath();
+    std::wstring temp_path = GetConfigPath();
+    LPCWSTR path = temp_path.c_str();
 #ifdef _DEBUG
-        std::stringstream ss;
-        ss << "\n[Config::Save] Saving config:\n"
-            << "  window_x           = " << cfg.windowX << "\n"
-            << "  window_y           = " << cfg.windowY << "\n"
-            << "  scale_index        = " << cfg.scaleIndex << "\n"
-            << "  transparency_index = " << cfg.transparencyIndex << "\n"
-            << "  pet_idle_index     = " << cfg.petIdleIndex << "\n"
-            << "  auto_startup       = " << (cfg.autoStartup ? "true" : "false") << "\n"
-            << "  click_through      = " << (cfg.clickThrough ? "true" : "false") << "\n"
-            << "  follow_mouse       = " << (cfg.followMouse ? "true" : "false") << "\n"
-            << "  defaultState       = " << (cfg.defaultState ? "true" : "false");
-        LOG_INFO(ss.str().c_str());
+    std::stringstream ss;
+    ss << "\n[Config::Save] Saving config:\n"
+        << "  window_x           = " << cfg.windowX << "\n"
+        << "  window_y           = " << cfg.windowY << "\n"
+        << "  scale_index        = " << cfg.scaleIndex << "\n"
+        << "  transparency_index = " << cfg.transparencyIndex << "\n"
+        << "  pet_idle_index      = " << cfg.petIdleIndex << "\n"
+        << "  auto_startup       = " << (cfg.autoStartup ? "true" : "false") << "\n"
+        << "  click_through      = " << (cfg.clickThrough ? "true" : "false") << "\n"
+        << "  follow_mouse       = " << (cfg.followMouse ? "true" : "false") << "\n"
+        << "  defaultState       = " << (cfg.defaultState ? "true" : "false");
+    LOG_INFO(ss.str().c_str());
+
 #endif 
-    std::ofstream out(path);
-    out << j.dump(2);
+
+    // 写入 [Location] 节
+    WritePrivateProfileStringW(L"Location", L"window_x", std::to_wstring(cfg.windowX).c_str(), path);
+    WritePrivateProfileStringW(L"Location", L"window_y", std::to_wstring(cfg.windowY).c_str(), path);
+
+    // 写入 [General] 节的整数
+    WritePrivateProfileStringW(L"General", L"scale_index", std::to_wstring(cfg.scaleIndex).c_str(), path);
+    WritePrivateProfileStringW(L"General", L"transparency_index", std::to_wstring(cfg.transparencyIndex).c_str(), path);
+    WritePrivateProfileStringW(L"General", L"pet_idle_index", std::to_wstring(cfg.petIdleIndex).c_str(), path);
+
+    // 写入 [General] 节的布尔值
+    WritePrivateProfileStringW(L"General", L"auto_startup", cfg.autoStartup ? L"true" : L"false", path);
+    WritePrivateProfileStringW(L"General", L"click_through", cfg.clickThrough ? L"true" : L"false", path);
+    WritePrivateProfileStringW(L"General", L"defaultState", cfg.defaultState ? L"true" : L"false", path);
+    WritePrivateProfileStringW(L"General", L"follow_mouse", cfg.followMouse ? L"true" : L"false", path);
 }
