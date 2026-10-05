@@ -8,7 +8,6 @@ struct AppConfig
     int petIdleIndex = 4;
     int windowX = 500;
     int windowY = 500;
-    bool autoStartup = false;
     bool clickThrough = false;
     bool followMouse = false;
     bool defaultState = true;
@@ -21,5 +20,5 @@ public:
     static void Save(const AppConfig& cfg);
 
 private:
-    static std::wstring GetConfigPath();
+    static std::string GetConfigPath();
 };

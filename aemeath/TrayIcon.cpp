@@ -18,9 +18,7 @@ void TrayIcon::Init(HINSTANCE hInst, HWND Hwnd_)
     nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
     nid.uCallbackMessage = WM_TRAYICON;
     nid.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_APPICON));
-    lstrcpyW(nid.szTip, L"飞行雪绒"); 
-
-
+    lstrcpy(nid.szTip, "飞行雪绒"); 
 
     Shell_NotifyIcon(NIM_ADD, &nid);
 }
@@ -43,46 +41,42 @@ void TrayIcon::ShowMenu()
 
     // 子菜单：透明度
     HMENU alphaMenu = CreatePopupMenu();
-    const wchar_t* alphaText[] = { L"100%",L"90%",L"80%",L"70%",L"60%",L"50%",L"40%",L"30%" };
+    PCSTR alphaText[] = { "100%","90%","80%","70%","60%","50%","40%","30%" };
     for (int i = 0; i < 8; i++)
-        AppendMenuW(alphaMenu,
+        AppendMenu(alphaMenu,
             (i == g_transparencyIndex ? MF_CHECKED : MF_UNCHECKED),
             2100 + i,
             alphaText[i]);
     // 子菜单：选择静止动画
     HMENU gifMenu = CreatePopupMenu();
-    const wchar_t* gifText[] = { L"1",L"2",L"3",L"4",L"随机" };
+    PCSTR gifText[] = { "1","2","3","4","随机" };
     for (int i = 0; i < 5; i++)
-        AppendMenuW(gifMenu,
+        AppendMenu(gifMenu,
             (i == g_petIdleIndex ? MF_CHECKED : MF_UNCHECKED),
             2400 + i,
             gifText[i]);
 
-    AppendMenuW(menu, MF_POPUP, (UINT_PTR)scaleMenu, L"缩放");
-    AppendMenuW(menu, MF_POPUP, (UINT_PTR)alphaMenu, L"透明度");
-    AppendMenuW(menu, MF_POPUP, (UINT_PTR)gifMenu, L"静止动画");
+    AppendMenu(menu, MF_POPUP, (UINT_PTR)scaleMenu, "缩放");
+    AppendMenu(menu, MF_POPUP, (UINT_PTR)alphaMenu, "透明度");
+    AppendMenu(menu, MF_POPUP, (UINT_PTR)gifMenu, "静止动画");
 
-    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+    AppendMenu(menu, MF_SEPARATOR, 0, nullptr);
 
-    AppendMenuW(menu,
+    AppendMenu(menu,
         g_config.followMouse ? MF_CHECKED : MF_UNCHECKED,
-        2200, L"跟随鼠标");
+        2200, "跟随鼠标");
 
-    AppendMenuW(menu,
+    AppendMenu(menu,
         g_config.clickThrough ? MF_CHECKED : MF_UNCHECKED,
-        2201, L"鼠标穿透");
-    AppendMenuW(menu,
+        2201, "鼠标穿透");
+    AppendMenu(menu,
         g_config.defaultState ? MF_CHECKED : MF_UNCHECKED,
-        2202, L"默认静止");
+        2202, "默认静止");
 
-    AppendMenuW(menu,
-        g_config.autoStartup ? MF_CHECKED : MF_UNCHECKED,
-        2203, L"开机自启");
+    AppendMenu(menu, MF_SEPARATOR, 0, nullptr);
 
-    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-
-    AppendMenuW(menu, MF_STRING, 2300, L"静止/飞行");
-    AppendMenuW(menu, MF_STRING, 2301, L"退出");
+    AppendMenu(menu, MF_STRING, 2300, "静止/飞行");
+    AppendMenu(menu, MF_STRING, 2301, "退出");
 
     SetForegroundWindow(Hwnd);
 

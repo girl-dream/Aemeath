@@ -3,7 +3,28 @@
 与原仓库不同的地方
 - 配置文件替换为 ini
 - 获取[UIAccess](https://github.com/killtimer0/uiaccess)始终置顶爱弥斯(<span style="color:red;">必须以管理员身份运行</span>)
+- 不再依赖Visual C++ 运行时库(VCRUNTIME140.dll)
+- 移除开机自动功能,由于需要以管理员身份启动无法实现,以下为实现方案
+   - Bypass UAC,此方案不正规
+   - [任务计划程序](https://www.bilibili.com/video/BV1Se4y1u7Rv)
+  <details>
+  <summary>不需要管理员身份启动的实现</summary>
 
+  ### 1. 注册表启动项
+
+  | 范围 | 路径 | 权限 |
+  |------|------|------|
+  | 当前用户 | `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run` | 普通用户 |
+  | 所有用户 | `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run` | 需要管理员权限 |
+
+  ### 2. 启动文件夹
+
+  | 范围 | 路径 | 权限 |
+  |------|------|------|
+  | 当前用户 | `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup` | 普通用户 |
+  | 所有用户 | `%ProgramData%\Microsoft\Windows\Start Menu\Programs\StartUp` | 需要管理员权限 |
+
+  </details>
 项目概述
 - `Aemeath` 是一个基于 Win32 + GDI+ 的桌面宠物/动画演示程序，使用分层窗口（`WS_EX_LAYERED`）实现每像素 alpha 混合。
 - GIF 的解码、缩放与逐帧渲染由 `GifPlayer` / `GifLoader` 实现。托盘交互、配置保存、运动逻辑等构成完整功能。

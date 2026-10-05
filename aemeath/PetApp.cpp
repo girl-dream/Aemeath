@@ -7,7 +7,7 @@ PetApp::PetApp(HINSTANCE hInst) : hInst(hInst) {}
 
 void PetApp::InitDPI()
 {
-    HMODULE shcore = LoadLibraryW(L"Shcore.dll");
+    HMODULE shcore = LoadLibrary("Shcore.dll");
     if (shcore)
     {
         auto fn = (SetProcessDpiAwarenessFunc)GetProcAddress(shcore, "SetProcessDpiAwareness");

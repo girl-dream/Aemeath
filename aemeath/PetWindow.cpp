@@ -33,11 +33,11 @@ PetWindow::PetWindow(HINSTANCE hInst) : hInst(hInst), tray()
     WNDCLASS wc = {};
     wc.lpfnWndProc = WndProc;
     wc.hInstance = hInst;
-    wc.lpszClassName = L"aemeath";
+    wc.lpszClassName = "aemeath";
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     RegisterClass(&wc);
     //窗口创建
-    Hwnd = CreateWindowEx(WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_TOPMOST ,wc.lpszClassName, L"",WS_POPUP, cfg.windowX, cfg.windowY, 200, 200, nullptr, nullptr, hInst, this);
+    Hwnd = CreateWindowEx(WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_TOPMOST ,wc.lpszClassName, "",WS_POPUP, cfg.windowX, cfg.windowY, 200, 200, nullptr, nullptr, hInst, this);
     // 加载 GIF（从资源）
     LoadAllGifs();
 
@@ -236,15 +236,6 @@ void PetWindow::HandleCommand(int id)
             cfg.defaultState = !cfg.defaultState;
             g_config = cfg;
             Config::Save(cfg);
-            return;
-        }
-        // 自启
-        case 2203:
-        {
-            cfg.autoStartup = !cfg.autoStartup;
-            g_config = cfg;
-            Config::Save(cfg);
-            SetAutoStartup(cfg.autoStartup);
             return;
         }
         // 暂停
@@ -467,29 +458,6 @@ void PetWindow::TogglePause()
         frameIndex = 0;
     }
 }
-// 设置或取消开机自启
-void PetWindow::SetAutoStartup(bool enable)
-{
-    HKEY key;
-    RegOpenKeyW(HKEY_CURRENT_USER,
-        LR"(Software\Microsoft\Windows\CurrentVersion\Run)",
-        &key);
-
-    if (enable)
-    {
-        wchar_t exePath[MAX_PATH];
-        GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-        RegSetValueExW(key, L"DesktopPet", 0, REG_SZ,
-            (BYTE*)exePath,
-            (DWORD)((wcslen(exePath) + 1) * sizeof(wchar_t)));
-    }
-    else
-    {
-        RegDeleteValueW(key, L"DesktopPet");
-    }
-
-    RegCloseKey(key);
-}
 // 保存当前窗口位置到配置文件，以便下次启动时恢复位置
 void PetWindow::SaveLocation()
 {
@@ -503,10 +471,10 @@ void PetWindow::SaveLocation()
 // 设置原子锁
 void PetWindow::CheckSingleInstance()
 {
-    hMutex = CreateMutex(NULL, FALSE, L"aemeath");
+    hMutex = CreateMutex(NULL, FALSE, "aemeath");
     if (GetLastError() == ERROR_ALREADY_EXISTS)
     {
-        MessageBox(NULL, L"程序已经在运行中！", L"提示", MB_ICONINFORMATION);
+        MessageBox(NULL, "程序已经在运行中！", "提示", MB_ICONINFORMATION);
         CloseHandle(hMutex);
         exit(0);
     }
