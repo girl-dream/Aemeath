@@ -1,3 +1,9 @@
+# 库洛游戏公司出品桌宠WuwaTappo
+
+下载地址：
+- [中国大陆地区](https://download-mc-wuwatappo.kurogames-global.com/download/)
+- [中国大陆地区之外](https://download-wutheringwaves-wuwatappo.kurogames-global.com/download/zh-tw/) **没有简体中文**
+ 
 # Aemeath (飞行雪绒)
 
 与原仓库不同的地方
